@@ -5,6 +5,7 @@ module.exports = function () {
     var self = this,
         cachedRepoUrls = null,
         maxPageLen = 100,
+        concurrentRequests = 20,
         makeUrl = function (repoUrl) {
             var fields = [
                 'values.uuid', 'values.build_number', 'values.state.name',
@@ -163,7 +164,7 @@ module.exports = function () {
                     return;
                 }
 
-                async.filterLimit(repoUrls, 10, queryPipelinesEnabled, function (error, repoUrls) {
+                async.filterLimit(repoUrls, concurrentRequests, queryPipelinesEnabled, function (error, repoUrls) {
                     if (error) {
                         callback(error);
                         return;
@@ -174,7 +175,7 @@ module.exports = function () {
             });
         },
         queryBuildsForRepositories = function (repoUrls, callback) {
-            async.mapLimit(repoUrls, 10, function (repoUrl, callback) {
+            async.mapLimit(repoUrls, concurrentRequests, function (repoUrl, callback) {
                 queryBuildsForRepo(repoUrl, callback);
             }, function (error, results) {
                 callback(error, flatten(results));
