@@ -129,6 +129,8 @@ operate in single-job or single-view mode. In single-job mode, the builds of
 a selected Jenkins job are shown. In single-view mode, the builds of all the
 jobs in a given Jenkins view are shown. In both modes, one can limit the
 maximum number of recent builds per job.
+If a job has nested jobs (like for Multibranch Pipelines or Folders), builds
+of all nested jobs are shown.
 
 ```json
 {

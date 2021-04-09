@@ -57,6 +57,17 @@ module.exports = function () {
                     return;
                 }
 
+                if (data.jobs) {
+                    // support nested jobs, supports Multibranch Repositories
+                    // /job/<project>/job/<repo name>/job/<branch name>/
+                    async.map(data.jobs, function (job, callback) {
+                        requestBuildsForJob(job.name, job.url, callback);
+                    }, function (error, results) {
+                        callback(error, flatten(results));
+                    });
+                    return;
+                }
+
                 if (typeof self.configuration.numberOfBuildsPerJob !== 'undefined') {
                     data.builds = data.builds.slice(0, self.configuration.numberOfBuildsPerJob);
                 }
