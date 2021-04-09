@@ -58,10 +58,14 @@ module.exports = function () {
         getIsRunning = function (statusText, _resultText, stageText) {
             return statusText !== "COMPLETED" && statusText !== "IN_PROGRESS" && stageText !== "PAUSED";
         },
+        getProject = function (res) {
+            var project = res.repository.full_name.replace('/', ' » ');
+            return project + (res.target && res.target.ref_name ? (' » ' +  res.target.ref_name) : '');
+        },
         simplifyBuild = function (res) {
             return {
                 id: res.uuid,
-                project: res.repository.name,
+                project: getProject(res),
                 number: res.build_number,
                 isRunning: getIsRunning(res.state.name, (res.state.result || {}).name, (res.state.stage || {}).name),
                 startedAt: parseDate(res.created_on),
