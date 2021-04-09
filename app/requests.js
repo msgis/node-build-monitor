@@ -27,8 +27,10 @@ module.exports = {
           }
         },
         function (error, response, body) {
+          var callbackCalled = false;
           try {
             if (response != undefined && response.statusCode === 200) {
+              callbackCalled = true;
               callback(error, body);
             } else {
               if (response != undefined)
@@ -36,20 +38,27 @@ module.exports = {
                 let httpErrRes = 'HTTP Reponse: '+response.statusCode+' '+http.STATUS_CODES[response.statusCode];
                 if (error) {
                   error.message += ' ('+httpErrRes+')';
+                  callbackCalled = true;
                   callback(error);
                 } else {
                   // If the request never reached the server, then chances are the error object is null, so lets return a status code error instead
+                  callbackCalled = true;
                   callback(new Error(httpErrRes), body);
                 }
               }
-              else{
-                callback(error, body);    
+              else {
+                callbackCalled = true;
+                callback(error, body);
               }
             }
           }
           catch (err) // some exception cannot be handled, like ECONNRESET
           {
-            callback(error, body);
+            if (!callbackCalled) {
+              callback(err, body);
+            } else {
+              throw err;
+            }
           }
         });
     }
