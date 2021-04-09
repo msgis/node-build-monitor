@@ -25,6 +25,10 @@ module.exports = function () {
         parseDate = function (dateAsString) {
             return dateAsString ? new Date(dateAsString) : null;
         },
+        parseDateAddSeconds = function (dateAsString, seconds) {
+            var date = dateAsString ? new Date(dateAsString) : null;
+            return date && seconds ? new Date(date.getTime() + seconds * 1000) : null;
+        },
         forEachResult = function (body, callback) {
             for (var i = 0; i < body.values.length; i++) {
                 callback(body.values[i]);
@@ -51,14 +55,17 @@ module.exports = function () {
 
             return statusText;
         },
+        getIsRunning = function (statusText, _resultText, stageText) {
+            return statusText !== "COMPLETED" && statusText !== "IN_PROGRESS" && stageText !== "PAUSED";
+        },
         simplifyBuild = function (res) {
             return {
                 id: res.uuid,
                 project: res.repository.name,
                 number: res.build_number,
-                isRunning: !res.completed_on,
+                isRunning: getIsRunning(res.state.name, (res.state.result || {}).name, (res.state.stage || {}).name),
                 startedAt: parseDate(res.created_on),
-                finishedAt: parseDate(res.completed_on),
+                finishedAt: parseDate(res.completed_on) || parseDateAddSeconds(res.created_on, res.build_seconds_used),
                 requestedFor: res.creator.display_name,
                 statusText: getStatusText(res.state.name, (res.state.result || {}).name, (res.state.stage || {}).name),
                 status: getStatus(res.state.name, (res.state.result || {}).name, (res.state.stage || {}).name),
