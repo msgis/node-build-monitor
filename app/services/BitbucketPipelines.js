@@ -4,14 +4,15 @@ var async = require('async');
 module.exports = function () {
     var self = this,
         cachedRepoUrls = null,
+        maxPageLen = 100,
         makeUrl = function (repoUrl) {
-            return repoUrl + '/pipelines/?sort=-created_on&pagelen=1';
+            return repoUrl + '/pipelines/?sort=-created_on&pagelen=' + maxPageLen;
         },
         makeRepositoryUrl = function () {
             return 'https://api.bitbucket.org/2.0/repositories/' + (self.configuration.teamname || self.configuration.username) + '/' + self.configuration.slug;
         },
         makeListRepositoriesUrl = function () {
-            return 'https://api.bitbucket.org/2.0/repositories/' + (self.configuration.teamname || self.configuration.username) + '?pagelen=50';
+            return 'https://api.bitbucket.org/2.0/repositories/' + (self.configuration.teamname || self.configuration.username) + '?pagelen=' + maxPageLen;
         },
         makeBasicAuthToken = function() {
             return Buffer.from(self.configuration.username + ':' + self.configuration.apiKey).toString('base64');
@@ -84,9 +85,14 @@ module.exports = function () {
                 }
 
                 var builds = [];
+                var projectsAdded = {};
 
                 forEachResult(body, function (res) {
-                    builds.push(simplifyBuild(res));
+                    var build = simplifyBuild(res);
+                    if (!projectsAdded[build.project]) {
+                        projectsAdded[build.project] = true;
+                        builds.push(build);
+                    }
                 });
 
                 callback(error, builds);
