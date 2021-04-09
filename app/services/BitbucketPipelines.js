@@ -6,13 +6,26 @@ module.exports = function () {
         cachedRepoUrls = null,
         maxPageLen = 100,
         makeUrl = function (repoUrl) {
-            return repoUrl + '/pipelines/?sort=-created_on&pagelen=' + maxPageLen;
+            var fields = [
+                'values.uuid', 'values.build_number', 'values.state.name',
+                'values.state.result.name', 'values.state.stage.name',
+                'values.created_on',
+                'values.completed_on', 'values.created_on', 'values.build_seconds_used',
+                'values.creator.display_name',
+                'values.repository.links.html.href',
+                'values.repository.full_name',
+                'values.target.ref_name'
+            ];
+            return repoUrl + '/pipelines/?sort=-created_on&pagelen=' + maxPageLen + '&fields=' + fields.join();
         },
         makeRepositoryUrl = function () {
-            return 'https://api.bitbucket.org/2.0/repositories/' + (self.configuration.teamname || self.configuration.username) + '/' + self.configuration.slug;
+            var workspace = self.configuration.teamname || self.configuration.username;
+            return 'https://api.bitbucket.org/2.0/repositories/' + workspace + '/' + self.configuration.slug;
         },
         makeListRepositoriesUrl = function () {
-            return 'https://api.bitbucket.org/2.0/repositories/' + (self.configuration.teamname || self.configuration.username) + '?pagelen=' + maxPageLen;
+            var workspace = self.configuration.teamname || self.configuration.username;
+            var fields = encodeURIComponentMany(['next', 'values.links.self.href']);
+            return 'https://api.bitbucket.org/2.0/repositories/' + workspace + '?pagelen=' + maxPageLen + '&fields=' + fields.join();
         },
         makeBasicAuthToken = function() {
             return Buffer.from(self.configuration.username + ':' + self.configuration.apiKey).toString('base64');
@@ -22,6 +35,12 @@ module.exports = function () {
             url: url,
             headers: {Authorization: 'Basic ' + makeBasicAuthToken()}
           }, callback);
+        },
+        encodeURIComponentMany = function (array) {
+            for (var i = 0; i < array.length; i++) {
+                array[i] = encodeURIComponent(array[i]);
+            }
+            return array;
         },
         parseDate = function (dateAsString) {
             return dateAsString ? new Date(dateAsString) : null;
@@ -107,7 +126,7 @@ module.exports = function () {
             // `/2.0/repositories/{workspace}/{repo_slug}/pipelines_config`
             // and read `enabled` from the response.
             // But then the user and the app token needs admin permissions.
-            makeRequest(repoUrl + '/pipelines/?pagelen=1', function (error, body) {
+            makeRequest(repoUrl + '/pipelines/?pagelen=1&fields=size', function (error, body) {
                 callback(error || body.error, body && body.size);
             });
         },
