@@ -33,21 +33,23 @@ module.exports = function () {
         flatten = function (arrayOfArray) {
             return [].concat.apply([], arrayOfArray);
         },
-        getStatus = function (statusText, resultText) {
+        getStatus = function (statusText, resultText, stageText) {
             if (statusText === "COMPLETED" && resultText === "SUCCESSFUL") return "Green";
             if (statusText === "COMPLETED" && resultText === "FAILED") return "Red";
             if (statusText === "COMPLETED" && resultText === "STOPPED") return "Gray";
             if (statusText === "PENDING") return "'#FFA500'";
+            if (statusText === "IN_PROGRESS" && stageText === "PAUSED") return "Gray";
             if (statusText === "IN_PROGRESS") return "Blue";
         },
-        getStatusText = function (statusText, resultText) {
-          if (statusText === "COMPLETED" && resultText === "SUCCESSFUL") return "Succeeded";
-          if (statusText === "COMPLETED" && resultText === "FAILED") return "Failed";
-          if (statusText === "COMPLETED" && resultText === "STOPPED") return "Stopped";
-          if (statusText === "PENDING") return "Pending";
-          if (statusText === "IN_PROGRESS") return "In Progress";
+        getStatusText = function (statusText, resultText, stageText) {
+            if (statusText === "COMPLETED" && resultText === "SUCCESSFUL") return "Succeeded";
+            if (statusText === "COMPLETED" && resultText === "FAILED") return "Failed";
+            if (statusText === "COMPLETED" && resultText === "STOPPED") return "Stopped";
+            if (statusText === "PENDING") return "Pending";
+            if (statusText === "IN_PROGRESS" && stageText === "PAUSED") return "Paused";
+            if (statusText === "IN_PROGRESS") return "In Progress";
 
-          return statusText;
+            return statusText;
         },
         simplifyBuild = function (res) {
             return {
@@ -58,8 +60,8 @@ module.exports = function () {
                 startedAt: parseDate(res.created_on),
                 finishedAt: parseDate(res.completed_on),
                 requestedFor: res.creator.display_name,
-                statusText: getStatusText(res.state.name, (res.state.result || {}).name),
-                status: getStatus(res.state.name, (res.state.result || {}).name),
+                statusText: getStatusText(res.state.name, (res.state.result || {}).name, (res.state.stage || {}).name),
+                status: getStatus(res.state.name, (res.state.result || {}).name, (res.state.stage || {}).name),
                 url: res.repository.links.self.href
             };
         },
