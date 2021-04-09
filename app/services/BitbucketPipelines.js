@@ -74,7 +74,7 @@ module.exports = function () {
                 requestedFor: res.creator.display_name,
                 statusText: getStatusText(res.state.name, (res.state.result || {}).name, (res.state.stage || {}).name),
                 status: getStatus(res.state.name, (res.state.result || {}).name, (res.state.stage || {}).name),
-                url: res.repository.links.self.href
+                url: res.repository.links.html.href + '/addon/pipelines/home#!/results/' + res.build_number
             };
         },
         queryBuildsForRepo = function (repoUrl, callback) {
