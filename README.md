@@ -446,7 +446,9 @@ In order to monitor a Bitbucket pipeline, one has to create an app-password by n
 
 Once "Create app password" has been clicked, one has to ensure that the "read pipelines" box
 has been checked. Once this box has been checked, click "create" and an AppPassword will be returned
-that has to be copied to the config.json:
+that has to be copied to the config.json.
+Do not set `slug` if all team or user repositories should be watched. In this case the AppPassword
+also needs "repositories read" permissions.
 
 ```json
 {
@@ -464,7 +466,7 @@ that has to be copied to the config.json:
 |------------------|------------------------------------
 | `apiKey`         | The API key on the Bitbucket settings
 | `username`       | The account username
-| `slug`           | The name of the project
+| `slug`           | The name of the project. If omitted all team or user repositories will be watched.
 | `teamname`       | The team owner of the project. Only use this if the team is the project owner.
 
 #### Buildkite
