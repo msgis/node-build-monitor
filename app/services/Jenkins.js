@@ -168,13 +168,19 @@ module.exports = function () {
                     }
                 }
             }
-
             return "Unknown";
+        },
+        getProject = function (build) {
+            if (build.fullDisplayName && build.fullDisplayName.length) {
+                // remove build number from display name
+                return build.fullDisplayName.split(' #').shift();
+            }
+            return decodeURIComponent(build.jobId);
         },
         simplifyBuild = function (res) {
             return {
                 id: res.jobId + '|' + res.id,
-                project: res.jobId,
+                project: getProject(res),
                 number: res.number,
                 isRunning: res.building,
                 startedAt: parseDate(res.timestamp),
