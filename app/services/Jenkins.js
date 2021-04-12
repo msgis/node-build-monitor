@@ -185,6 +185,7 @@ module.exports = function () {
                 isRunning: res.building,
                 startedAt: parseDate(res.timestamp),
                 finishedAt: parseDate(res.timestamp + res.duration),
+                estimatedDuration: res.estimatedDuration,
                 requestedFor: getRequestedFor(res),
                 status: getStatus(res),
                 statusText: getStatusText(res),
