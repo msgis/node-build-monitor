@@ -75,7 +75,7 @@ define(['ko', 'moment', 'countdown'], function (ko, moment, countdown) {
 
         this.progress = ko.forcibleComputed(function () {
             return isNaN(this.finishedAt()) ?
-                (this.estimatedDuration() ?
+                (this.estimatedDuration() && this.isRunning() ?
                     (Date.now() - this.startedAt()) / this.estimatedDuration() :
                     0
                 ) :
