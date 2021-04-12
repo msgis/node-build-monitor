@@ -1,6 +1,6 @@
-FROM node:7.7.3-slim
+FROM node:14-alpine
 
-RUN npm install -g forever
+RUN apk add --no-cache tini
 
 WORKDIR /build-mon
 
@@ -14,4 +14,7 @@ ONBUILD ADD config.json /build-mon/app/config.json
 
 EXPOSE 3000
 
-CMD [ "forever","--watch", "--watchDirectory", "/build-mon/app", "/build-mon/app/app.js"]
+USER node
+
+ENTRYPOINT ["/sbin/tini", "--"]
+CMD [ "/sbin/tini", "node", "/build-mon/app/app.js" ]
