@@ -11,7 +11,7 @@
   border: 1px solid black;
 }
 
-.default-theme .middle { 
+.default-theme .middle {
   vertical-align: middle;
 }
 
@@ -67,6 +67,16 @@
   text-align: center;
   vertical-align: middle;
   opacity: 0.8;
+}
+
+.flex-item .progress {
+  background-color: black;
+  opacity: 0.5;
+  position: absolute;
+  top: 25px;
+  right: 0px;
+  left: 5%;
+  bottom: -4px;
 }
 
 .default-theme .flex-item .info-block {

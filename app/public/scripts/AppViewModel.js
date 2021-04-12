@@ -122,6 +122,7 @@ define(['ko', 'notification', 'BuildViewModel', 'OptionsViewModel'], function (k
             self.builds().forEach(function (build) {
                 build.time.evaluateImmediate();
                 build.duration.evaluateImmediate();
+                build.progress.evaluateImmediate();
             });
         };
 

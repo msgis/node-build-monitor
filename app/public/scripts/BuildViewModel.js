@@ -12,6 +12,7 @@ define(['ko', 'moment', 'countdown'], function (ko, moment, countdown) {
         this.number = ko.observable();
         this.startedAt = ko.observable();
         this.finishedAt = ko.observable();
+        this.estimatedDuration = ko.observable();
         this.queuedAt = ko.observable();
         this.status = ko.observable(build.status);
         this.statusText = ko.observable();
@@ -32,6 +33,7 @@ define(['ko', 'moment', 'countdown'], function (ko, moment, countdown) {
             this.number(build.number);
             this.startedAt(moment(build.startedAt));
             this.finishedAt(moment(build.finishedAt));
+            this.estimatedDuration(build.estimatedDuration);
             this.queuedAt(moment(build.queuedAt));
             this.status(build.status);
             this.statusText(build.statusText);
@@ -69,6 +71,25 @@ define(['ko', 'moment', 'countdown'], function (ko, moment, countdown) {
                     'queued for ' + countdown(this.startedAt(), this.queuedAt()).toString() :
                     'ran for ' + countdown(this.startedAt(), this.finishedAt()).toString()
                 );
+        }, this);
+
+        this.progress = ko.forcibleComputed(function () {
+            return isNaN(this.finishedAt()) ?
+                (this.estimatedDuration() ?
+                    (Date.now() - this.startedAt()) / this.estimatedDuration() :
+                    0
+                ) :
+                1;
+        }, this);
+
+        this.styleProgress = ko.computed(function () {
+            var progress = Math.round(this.progress() * 100);
+            if (progress && progress < 100) {
+                return {
+                    'left': progress + '%',
+                    'display': 'block'
+                };
+            }
         }, this);
 
         this.isMenuAvailable = ko.computed(function () {
