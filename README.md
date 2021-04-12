@@ -50,7 +50,8 @@ You have four options:
 
 ### Configuration
 
-The build monitor configuration can be placed in one of the following locations:
+Build monitor can be configured via environment variables or a configuration file.
+A configuration file can be placed in one of the following locations:
 
 1. `%HomeDirectory%/node-build-monitor-config.json`
 2. `%PathOfExecutable%/config.json` (only for the standalone version)4.
@@ -60,6 +61,19 @@ The build monitor configuration can be placed in one of the following locations:
 6. `app/config.js`
 
 The configuration can be provided as json or as a module which exports the configuration object.
+
+Configuration as environment varables:
+
+```bash
+BUILDMONITOR_MONITOR__INTERVAL=30000
+BUILDMONITOR_MONITOR__ERRORS_FIRST=false
+BUILDMONITOR_MONITOR__EXPAND_ENVIRONMENT_VARIABLES=false
+BUILDMONITOR_SERVICES__0__NAME=Travis
+BUILDMONITOR_SERVICES__0__CONFIGURATION__SLUG=node-build-monitor
+BUILDMONITOR_SERVICES__1__NAME=Travis
+BUILDMONITOR_SERVICES__1__CONFIGURATION__SLUG=marcells/bloggy
+BUILDMONITOR_SERVICES__1__CONFIGURATION__LATEST_BUILD_ONLY=true
+```
 
 Configuration as json:
 
@@ -686,6 +700,19 @@ Supports the [Drone](https://drone.io) build service (version 1.0 minimum)
 6. Open your browser and navigate to [http://localhost:3000](http://localhost:3000) (switch to fullscreen for the best experience)
 
 Run `grunt` to execute the tests and check the source code with [JSHint](http://jshint.com/).
+
+### Run it with Docker
+
+```bash
+# build default docker image
+docker build -t build-monitor .
+# run image
+docker run --rm -it \
+  -p 3000:3000 \
+  -e "BUILDMONITOR_MONITOR__INTERVAL=1000" \
+  -e "BUILDMONITOR_SERVICES__0__NAME=Fake" \
+  build-monitor
+```
 
 ### Run it with Docker Compose (in production)
 
