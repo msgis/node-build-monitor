@@ -77,20 +77,49 @@ module.exports = function () {
             return statusText;
         },
         getIsRunning = function (statusText, _resultText, stageText) {
-            return statusText !== "COMPLETED" && statusText !== "IN_PROGRESS" && stageText !== "PAUSED";
+            return statusText === "IN_PROGRESS" && stageText !== "PAUSED";
+        },
+        getIsQueued = function (statusText, _resultText, _stageText) {
+            return statusText === "PENDING";
         },
         getProject = function (res) {
             var project = res.repository.full_name.replace('/', ' » ');
             return project + (res.target && res.target.ref_name ? (' » ' +  res.target.ref_name) : '');
         },
-        simplifyBuild = function (res) {
+        getEstimatedDuration = function (res, previous) {
+            var totalBuildSeconds = 0;
+            var totalBuildCount = 0;
+
+            previous = previous.slice(0, 5);
+
+            var addResult = function (res) {
+                var statusText = getStatusText(res.state.name, (res.state.result || {}).name, (res.state.stage || {}).name);
+                if (statusText === "Succeeded" || statusText === "Paused") {
+                    totalBuildSeconds += res.build_seconds_used;
+                    totalBuildCount++;
+                }
+            };
+
+            addResult(res);
+
+            for (var i = 0; i < previous.length; i++) {
+                addResult(previous[i]);
+            }
+
+            var duration = Math.round((totalBuildSeconds / totalBuildCount) * 1000);
+            return duration && !isNaN(duration) ? duration : null;
+        },
+        simplifyBuild = function (res, previous) {
+            previous = previous || [];
             return {
                 id: res.uuid,
                 project: getProject(res),
                 number: res.build_number,
                 isRunning: getIsRunning(res.state.name, (res.state.result || {}).name, (res.state.stage || {}).name),
+                isQueued: getIsQueued(res.state.name, (res.state.result || {}).name, (res.state.stage || {}).name),
                 startedAt: parseDate(res.created_on),
                 finishedAt: parseDate(res.completed_on) || parseDateAddSeconds(res.created_on, res.build_seconds_used),
+                estimatedDuration: getEstimatedDuration(res, previous),
                 requestedFor: res.creator.display_name,
                 statusText: getStatusText(res.state.name, (res.state.result || {}).name, (res.state.stage || {}).name),
                 status: getStatus(res.state.name, (res.state.result || {}).name, (res.state.stage || {}).name),
@@ -105,15 +134,20 @@ module.exports = function () {
                 }
 
                 var builds = [];
-                var projectsAdded = {};
+                var byProject = {};
 
                 forEachResult(body, function (res) {
-                    var build = simplifyBuild(res);
-                    if (!projectsAdded[build.project]) {
-                        projectsAdded[build.project] = true;
-                        builds.push(build);
+                    var project = getProject(res);
+                    if (!byProject[project]) {
+                        byProject[project] = [];
                     }
+                    byProject[project].push(res);
                 });
+
+                for (var project in byProject) {
+                    var build = simplifyBuild(byProject[project].shift(), byProject[project]);
+                    builds.push(build);
+                }
 
                 callback(error, builds);
             });
