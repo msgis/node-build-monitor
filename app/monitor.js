@@ -25,9 +25,9 @@ var async = require('async'),
             });
         }
         else {
-            sortBuildsByDate(newBuilds);
+            sortBuildsByDate(newBuilds, sortOrder == "started");
         }
-        
+
         if (errorFirst)
         {
             var errorChunk = [];
@@ -45,9 +45,9 @@ var async = require('async'),
 
         return newBuilds;
     },
-    sortBuildsByDate = function(newBuilds){
+    sortBuildsByDate = function(newBuilds, sortByStarted){
         var takeDate = function (build) {
-                return build.isRunning ? build.startedAt : build.finishedAt;
+                return build.isRunning || sortByStarted ? build.startedAt : build.finishedAt;
             };
 
         newBuilds.sort(function (a, b) {
@@ -190,9 +190,9 @@ module.exports = function () {
                     console.log();
                     console.log();
                   }
-                  
+
                   callback();
-                  
+
                   return;
                 }
 
