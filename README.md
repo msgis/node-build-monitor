@@ -53,8 +53,15 @@ You have four options:
 The build monitor configuration can be placed in one of the following locations:
 
 1. `%HomeDirectory%/node-build-monitor-config.json`
-2. `%PathOfExecutable%/config.json` (only for the standalone version)
+2. `%PathOfExecutable%/config.json` (only for the standalone version)4.
 3. `app/config.json`
+4. `%HomeDirectory%/node-build-monitor-config.js`
+5. `%PathOfExecutable%/config.js` (only for the standalone version)
+6. `app/config.js`
+
+The configuration can be provided as json or as a module which exports the configuration object.
+
+Configuration as json:
 
 ```json
 {
@@ -83,6 +90,37 @@ The build monitor configuration can be placed in one of the following locations:
     }
   ]
 }
+```
+
+Configuration as module:
+
+```javascript
+module.exports = {
+  "monitor": {
+    "interval": 30000,
+    "numberOfBuilds": 12,
+    "latestBuildOnly": false,
+    "sortOrder": "date",
+    "errorsFirst": false,
+    "expandEnvironmentVariables": false,
+    "debug": true
+  },
+  "services": [
+    {
+      "name": "Travis",
+      "configuration": {
+        "slug": "node-build-monitor"
+      }
+    },
+    {
+      "name": "Travis",
+      "configuration": {
+        "slug": "marcells/bloggy",
+        "latestBuildOnly": true
+      }
+    }
+  ]
+};
 ```
 
 In the `monitor` section you can set up some general settings:

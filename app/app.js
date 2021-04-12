@@ -9,12 +9,17 @@ var express = require('express'),
     app = express();
 
 function getConfig() {
-  const defaultConfigFileName = 'config.json';
-  const userConfigFileName = 'node-build-monitor-config.json';
+  const defaultConfigFileName = 'config';
+  const userConfigFileName = 'node-build-monitor-config';
   const possibleFileNames = [
-    path.join(require('os').homedir(), userConfigFileName),
-    ...(process.pkg !== undefined ? [ path.join(path.dirname(process.execPath), defaultConfigFileName) ] : []),
-    path.join(__dirname, defaultConfigFileName)
+    // json configs
+    path.join(require('os').homedir(), userConfigFileName + '.json'),
+    ...(process.pkg !== undefined ? [ path.join(path.dirname(process.execPath), defaultConfigFileName + '.json') ] : []),
+    path.join(__dirname, defaultConfigFileName + '.json'),
+    // modules
+    path.join(require('os').homedir(), userConfigFileName + '.js'),
+    ...(process.pkg !== undefined ? [ path.join(path.dirname(process.execPath), defaultConfigFileName + '.js') ] : []),
+    path.join(__dirname, defaultConfigFileName + '.js')
   ];
 
   const availableFileNames = possibleFileNames.filter(possibleFileName => fs.existsSync(possibleFileName));
@@ -24,7 +29,7 @@ function getConfig() {
     throw new Error(`Please provide a configuration file at one of the following locations: \n${humanReadableFileList}`);
   }
 
-  return JSON.parse(fs.readFileSync(availableFileNames[0], 'utf8'));
+  return require(availableFileNames[0]);
 }
 
 function printStartupInformation() {
