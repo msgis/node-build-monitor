@@ -22,7 +22,7 @@ var request = require('request'),
         },
             function (error, response, body) {
                 if (error || response.statusCode !== 200) {
-                    callback(error || true);
+                    callback(error || response.statusCode);
                     return;
                 }
 
